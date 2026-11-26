@@ -9,7 +9,7 @@ const GlobalErrorHandler = require("./Middleware/ErrorHandler")
 
 
 const AuthRoute = require("./Routes/AuthRoutes")
-
+const TransformerRoute = require("./Routes/TransformerRoutes")
 
 
 
@@ -30,7 +30,7 @@ app.use(CORS({
 
 
 app.use("/api/auth",AuthRoute)
-
+app.use("/api/transformer",TransformerRoute)
 
 
 
