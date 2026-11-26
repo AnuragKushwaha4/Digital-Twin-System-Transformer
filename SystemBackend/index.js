@@ -3,12 +3,13 @@ const cookieParser = require("cookie-parser")
 const CORS = require("cors")
 const express = require("express")
 const ConnectDB = require("./Configs/Connection")
-const GlobalErrorHandler = require("./Middlewares/ErrorHandler")
+const GlobalErrorHandler = require("./Middleware/ErrorHandler")
 
 
 
 
 const AuthRoute = require("./Routes/AuthRoutes")
+
 
 
 
@@ -29,6 +30,7 @@ app.use(CORS({
 
 
 app.use("/api/auth",AuthRoute)
+
 
 
 
