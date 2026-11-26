@@ -26,50 +26,32 @@ exports.checkTemperature = (temperature) => {
 
     const evaluate = (value, limits) => {
 
-        if (typeof value !== "number" || !Number.isFinite(value)) {
-            throw createError("Invalid temperature value");
-        }
+    if (!Number.isFinite(value)) {
+        throw createError("Invalid temperature value");
+    }
 
-        if (limits.critical.max === Infinity) {
-            // Ambient temperature
-            if (value < limits.healthy.min) {
-                return {
-                    status: "warning",
-                    message: "Temperature is below the selected healthy range"
-                };
-            }
+    // Ambient temperature
+    if (limits.critical.max === Infinity &&
+        limits.healthy.min !== undefined) {
 
-            if (value <= limits.healthy.max) {
-                return {
-                    status: "healthy",
-                    message: "Temperature is within the healthy range"
-                };
-            }
-
-            if (value <= limits.warning.max) {
-                return {
-                    status: "warning",
-                    message: "Temperature is above the healthy range"
-                };
-            }
-
+        if (value < limits.healthy.min) {
             return {
-                status: "critical",
-                message: "Temperature has exceeded the critical limit"
+                status: "warning",
+                message: "Temperature is below the healthy range"
             };
         }
 
-        if (value < limits.healthy.max) {
+        if (value <= limits.healthy.max) {
             return {
                 status: "healthy",
                 message: "Temperature is within the healthy range"
             };
         }
 
-        if (value < limits.critical.max) {
+        if (value <= limits.warning.max) {
             return {
                 status: "warning",
-                message: "Temperature is in the warning range"
+                message: "Temperature is above the healthy range"
             };
         }
 
@@ -77,7 +59,27 @@ exports.checkTemperature = (temperature) => {
             status: "critical",
             message: "Temperature has exceeded the critical limit"
         };
+    }
+
+    if (value < limits.healthy.max) {
+        return {
+            status: "healthy",
+            message: "Temperature is within the healthy range"
+        };
+    }
+
+    if (value <= limits.warning.max) {
+        return {
+            status: "warning",
+            message: "Temperature is in the warning range"
+        };
+    }
+
+    return {
+        status: "critical",
+        message: "Temperature has exceeded the critical limit"
     };
+};
 
 
     for (const parameter of ["ambient", "topOil", "winding"]) {
