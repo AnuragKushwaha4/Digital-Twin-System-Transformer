@@ -1,11 +1,37 @@
+
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import Header from "./Components/CommanComponent/Header";
+import Register from "./Components/AuthComponent/Register";
+import Login from "./Components/AuthComponent/Login";
+
 function App() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-      <h1 className="text-4xl font-bold text-blue-600">
-        Digital Twin System
-      </h1>
-    </div>
-  )
+    return (
+        <BrowserRouter>
+
+            <Header />
+
+            <Routes>
+                <Route path="/" element={<Navigate to="/login" replace />} />
+
+                <Route path="/register" element={<Register />} />
+
+                <Route path="/login" element={<Login />} />
+
+                <Route
+                    path="/transformers"
+                    element={
+                        <div className="p-10 text-center text-2xl font-bold">
+                            Transformer Dashboard Coming Soon
+                        </div>
+                    }
+                />
+
+                <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+
+        </BrowserRouter>
+    );
 }
 
-export default App
+export default App;
