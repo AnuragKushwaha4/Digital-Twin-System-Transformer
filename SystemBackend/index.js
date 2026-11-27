@@ -38,6 +38,11 @@ app.get("/",(req,res)=>{
     res.json({message:"server stared"})
 })
 
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+    return res.status(200).send("OK");
+});
+
 
 
 
