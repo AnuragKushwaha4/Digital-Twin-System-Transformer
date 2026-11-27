@@ -20,7 +20,7 @@ app.use(express.json());
 
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://digital-twin-system-transformer-qwn.vercel.app/"
+    "https://digital-twin-system-transformer-qwn.vercel.app"
 ];
 
 app.use(cors({
