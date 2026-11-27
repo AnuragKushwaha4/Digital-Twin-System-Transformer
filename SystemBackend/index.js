@@ -1,26 +1,22 @@
-const config = require("./Configs/Config")
-const cookieParser = require("cookie-parser")
-const CORS = require("cors")
-const express = require("express")
-const ConnectDB = require("./Configs/Connection")
-const GlobalErrorHandler = require("./Middleware/ErrorHandler")
 
+const config = require("./Configs/Config");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const express = require("express");
+const ConnectDB = require("./Configs/Connection");
+const GlobalErrorHandler = require("./Middleware/ErrorHandler");
 
+const AuthRoute = require("./Routes/AuthRoutes");
+const TransformerRoute = require("./Routes/TransformerRoutes");
 
+const app = express();
 
-const AuthRoute = require("./Routes/AuthRoutes")
-const TransformerRoute = require("./Routes/TransformerRoutes")
+ConnectDB();
 
-
-
-const app = express()
-
-ConnectDB()
 const PORT = config.port;
 
-
-app.use(cookieParser())
-app.use(express.json())
+app.use(cookieParser());
+app.use(express.json());
 
 const allowedOrigins = [
     "http://localhost:5173",
@@ -38,35 +34,21 @@ app.use(cors({
     credentials: true
 }));
 
+app.use("/api/auth", AuthRoute);
+app.use("/api/transformer", TransformerRoute);
 
-
-app.use("/api/auth",AuthRoute)
-app.use("/api/transformer",TransformerRoute)
-
-
-
-app.get("/",(req,res)=>{
-    res.json({message:"server stared"})
-})
+app.get("/", (req, res) => {
+    res.json({ message: "server started" });
+});
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
     return res.status(200).send("OK");
 });
 
+// Global error handler
+app.use(GlobalErrorHandler);
 
-
-
-
-
-// Error handler :
-app.use(GlobalErrorHandler)
-
-
-
-
-
-
-app.listen(PORT,()=>{
-    console.log(`Started Server :${PORT} `)
-})
+app.listen(PORT, () => {
+    console.log(`Started Server: ${PORT}`);
+});
