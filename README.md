@@ -39,7 +39,7 @@ The primary objective is to support condition-based monitoring and help identify
 
 The application is deployed and can be accessed using the following link:
 
-**Frontend:** [Insert deployed frontend URL]
+**Frontend:** [[Insert deployed frontend URL](https://digital-twin-system-transformer-qwn.vercel.app/)]
 
 **Demo Login Credentials:**
 
