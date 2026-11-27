@@ -1,18 +1,22 @@
+
 const User = require("../Models/UserModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const config = require("../config");
 
 // Generate JWT token
 const generateToken = (userId) => {
     return jwt.sign(
         { id: userId },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+        config.JWT_SECRET,
+        { expiresIn: config.JWT_EXPIRES_IN }
     );
 };
 
+
 // Register user
 exports.registerUser = async (userData) => {
+
     const { name, email, password, phone } = userData;
 
     const normalizedEmail = email.toLowerCase().trim();
