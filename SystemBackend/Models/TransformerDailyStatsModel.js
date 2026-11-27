@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 
 const transformerDailyStatsSchema = new mongoose.Schema({
@@ -14,17 +13,23 @@ const transformerDailyStatsSchema = new mongoose.Schema({
         required: true
     },
 
+    // Number of readings collected during this day
+    sampleCount: {
+        type: Number,
+        required: true,
+        default: 1,
+        min: 1
+    },
+
     temperature: {
         ambient: {
             type: Number,
             required: true
         },
-
         topOil: {
             type: Number,
             required: true
         },
-
         winding: {
             type: Number,
             required: true
@@ -37,7 +42,6 @@ const transformerDailyStatsSchema = new mongoose.Schema({
             required: true,
             min: 0
         },
-
         averagePercentage: {
             type: Number,
             required: true,
@@ -50,7 +54,6 @@ const transformerDailyStatsSchema = new mongoose.Schema({
             type: Number,
             required: true
         },
-
         averageMoisture: {
             type: Number,
             required: true,
@@ -60,7 +63,6 @@ const transformerDailyStatsSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// One daily record per transformer
 transformerDailyStatsSchema.index(
     { transformer: 1, date: 1 },
     { unique: true }

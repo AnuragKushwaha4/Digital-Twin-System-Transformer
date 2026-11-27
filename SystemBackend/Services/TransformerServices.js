@@ -303,17 +303,34 @@ exports.deleteTransformer = async (transformer, DailyStats) => {
 
 
 // Calculate daily averages for transformer statistics
+
 exports.calculateDailyAverages = (existingStats, readings) => {
 
-    const count = existingStats ? existingStats.sampleCount : 0;
+    const count = existingStats?.sampleCount || 0;
     const nextCount = count + 1;
 
-    const calculateAverage = (oldAverage, newValue) => {
-        if (count === 0) return newValue;
+    // Round values to 2 decimal places
+    const roundToTwo = (value) => Number(value.toFixed(2));
 
-        return (
+    const calculateAverage = (oldAverage, newValue) => {
+
+        if (!Number.isFinite(newValue)) {
+            throw createError("Invalid reading for daily average");
+        }
+
+        if (count === 0) {
+            return roundToTwo(newValue);
+        }
+
+        if (!Number.isFinite(oldAverage)) {
+            throw createError("Invalid existing daily average");
+        }
+
+        const average = (
             (oldAverage * count + newValue) / nextCount
         );
+
+        return roundToTwo(average);
     };
 
     const oldTemperature = existingStats?.temperature || {};

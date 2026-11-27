@@ -61,10 +61,9 @@ exports.addTransformer = async (req, res, next) => {
 };
 
 
-// 2. Get Current Transformer Condition
+
 exports.getTransformerCondition = async (req, res, next) => {
     try {
-
         const { transformerID } = req.params;
 
         const {
@@ -74,16 +73,40 @@ exports.getTransformerCondition = async (req, res, next) => {
             current
         } = req.body;
 
-        // Fetch transformer only once
+        // 1. Fetch transformer
         const transformer = await getTransformer(transformerID);
 
-        // Validate electrical measurements
+        // 2. Validate temperature readings
+        if (
+            !temperature ||
+            !["ambient", "topOil", "winding"].every(
+                key => Number.isFinite(temperature[key])
+            )
+        ) {
+            const error = new Error("Invalid temperature readings");
+            error.status = 400;
+            throw error;
+        }
+
+        // 3. Validate oil readings
+        if (
+            !oil ||
+            !Number.isFinite(oil.moisture) ||
+            !Number.isFinite(oil.level)
+        ) {
+            const error = new Error("Invalid oil readings");
+            error.status = 400;
+            throw error;
+        }
+
+        // 4. Validate voltage and current
         if (
             !Number.isFinite(voltage?.lineToLine) ||
             voltage.lineToLine <= 0 ||
             !["A", "B", "C"].every(
-                phase => Number.isFinite(current?.[phase]) &&
-                         current[phase] >= 0
+                phase =>
+                    Number.isFinite(current?.[phase]) &&
+                    current[phase] >= 0
             )
         ) {
             const error = new Error("Invalid voltage or current readings");
@@ -91,105 +114,131 @@ exports.getTransformerCondition = async (req, res, next) => {
             throw error;
         }
 
-        // Calculate average three-phase current
+        // 5. Calculate average three-phase current
         const averageCurrent = (
             current.A + current.B + current.C
         ) / 3;
 
-        // Three-phase apparent power
+        // 6. Calculate apparent power in kVA
         const apparentPowerKVA = (
             Math.sqrt(3) *
             voltage.lineToLine *
             averageCurrent
         ) / 1000;
 
+        // 7. Calculate load percentage
+        const ratedCapacity = Number(
+            transformer.specification.ratedCapacity
+        );
 
-        // Evaluate temperature
+        if (
+            !Number.isFinite(ratedCapacity) ||
+            ratedCapacity <= 0
+        ) {
+            throw new Error("Invalid transformer rated capacity");
+        }
+
+
+        // 8. Evaluate temperature
         const temperatureResult =
             TransformerServices.checkTemperature(temperature);
 
-
-        // Evaluate oil
+        // 9. Evaluate oil
         const oilResult =
             TransformerServices.checkOil(oil, transformer);
 
-
-        // Evaluate load
+        // 10. Evaluate load
         const loadResult =
             TransformerServices.checkLoad(
                 apparentPowerKVA,
                 transformer
             );
 
-
-        // Calculate overall condition
-        const overallStatus = [
+        // 11. Calculate overall condition
+        const statuses = [
             temperatureResult.status,
             oilResult.status,
             loadResult.status
-        ].includes("critical")
+        ];
+
+        const overallStatus = statuses.includes("critical")
             ? "critical"
-            : [
-                temperatureResult.status,
-                oilResult.status,
-                loadResult.status
-            ].includes("warning")
+            : statuses.includes("warning")
                 ? "warning"
                 : "healthy";
 
+        // 12. Get UTC day start
+        const now = new Date();
 
-        // Use UTC day boundaries consistently
-        // const now = new Date();
-        // const date = new Date(Date.UTC(
-        //     now.getUTCFullYear(),
-        //     now.getUTCMonth(),
-        //     now.getUTCDate()
-        // ));
+        const date = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate()
+        ));
 
+        // 13. Fetch existing daily statistics
+        const existingStats = await DailyStats.findOne({
+            transformer: transformer._id,
+            date
+        });
 
-        // // Fetch existing daily record once
-        // const existingStats = await DailyStats.findOne({
-        //     transformer: transformer._id,
-        //     date
-        // });
+        // 14. Calculate updated daily averages
+        const dailyAverages =
+            TransformerServices.calculateDailyAverages(
+                existingStats,
+                {
+                    temperature,
+                    oil,
+                    load: {
+                        apparentPowerKVA,
+                        loadPercentage: loadResult.loadPercentage
+                    }
+                }
+            );
 
+        // 15. Validate daily averages before saving
+        const requiredValues = [
+            dailyAverages?.temperature?.ambient,
+            dailyAverages?.temperature?.topOil,
+            dailyAverages?.temperature?.winding,
+            dailyAverages?.load?.averageKVA,
+            dailyAverages?.load?.averagePercentage,
+            dailyAverages?.oil?.averageLevel,
+            dailyAverages?.oil?.averageMoisture
+        ];
 
-        // // Calculate new daily averages
-        // const dailyAverages =
-        //     TransformerServices.calculateDailyAverages(
-        //         existingStats,
-        //         {
-        //             temperature,
-        //             oil,
-        //             load: {
-        //                 apparentPowerKVA,
-        //                 loadPercentage: loadResult.loadPercentage
-        //             }
-        //         }
-        //     );
+        if (!requiredValues.every(Number.isFinite)) {
+            console.error("Invalid daily averages:", dailyAverages);
 
+            const error = new Error(
+                "Unable to calculate valid daily averages"
+            );
 
-        // // Save daily averages
-        // await DailyStats.findOneAndUpdate(
-        //     {
-        //         transformer: transformer._id,
-        //         date
-        //     },
-        //     {
-        //         $set: {
-        //             ...dailyAverages,
-        //             transformer: transformer._id,
-        //             date
-        //         }
-        //     },
-        //     {
-        //         upsert: true,
-        //         new: true,
-        //         runValidators: true
-        //     }
-        // );
+            error.status = 500;
+            throw error;
+        }
 
+        // 16. Save daily averages
+        await DailyStats.findOneAndUpdate(
+            {
+                transformer: transformer._id,
+                date
+            },
+            {
+                $set: {
+                    ...dailyAverages,
+                    transformer: transformer._id,
+                    date
+                }
+            },
+            {
+                upsert: true,
+                new: true,
+                runValidators: true
+            }
+        );
 
+        // 17. Return current condition
         return res.status(200).json({
             success: true,
             message: "Transformer condition evaluated successfully",
@@ -205,9 +254,7 @@ exports.getTransformerCondition = async (req, res, next) => {
                 temperature: temperatureResult,
                 oil: oilResult,
                 load: loadResult
-            },
-
-            // dailyAverages
+            }
         });
 
     } catch (error) {
@@ -258,6 +305,31 @@ exports.deleteTransformer = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             message: "Transformer and its monitoring history deleted successfully"
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+exports.getTransformerHistory = async (req, res, next) => {
+    try {
+        const { transformerID } = req.params;
+
+        const transformer = await getTransformer(transformerID);
+
+        const history = await DailyStats.find({
+            transformer: transformer._id
+        })
+        .sort({ date: -1 })
+        .lean();
+
+        return res.status(200).json({
+            success: true,
+            count: history.length,
+            data: history
         });
 
     } catch (error) {

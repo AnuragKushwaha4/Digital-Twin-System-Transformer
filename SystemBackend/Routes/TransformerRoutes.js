@@ -39,4 +39,12 @@ router.get(
     TransformerControllers.getAllTransformers
 );
 
+
+router.get(
+    "/:transformerID/history",
+    Authorized,
+    TransformerControllers.getTransformerHistory
+);
+
+
 module.exports = router;
