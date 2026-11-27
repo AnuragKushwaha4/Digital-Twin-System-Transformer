@@ -22,6 +22,25 @@ const getTransformer = async (transformerID) => {
 };
 
 
+
+exports.getAllTransformers = async (req, res, next) => {
+    try {
+        const transformers = await Transformer.find().sort({
+            transformerID: 1
+        });
+
+        return res.status(200).json({
+            success: true,
+            count: transformers.length,
+            data: transformers
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 // 1. Add Transformer
 exports.addTransformer = async (req, res, next) => {
     try {
@@ -120,55 +139,55 @@ exports.getTransformerCondition = async (req, res, next) => {
 
 
         // Use UTC day boundaries consistently
-        const now = new Date();
-        const date = new Date(Date.UTC(
-            now.getUTCFullYear(),
-            now.getUTCMonth(),
-            now.getUTCDate()
-        ));
+        // const now = new Date();
+        // const date = new Date(Date.UTC(
+        //     now.getUTCFullYear(),
+        //     now.getUTCMonth(),
+        //     now.getUTCDate()
+        // ));
 
 
-        // Fetch existing daily record once
-        const existingStats = await DailyStats.findOne({
-            transformer: transformer._id,
-            date
-        });
+        // // Fetch existing daily record once
+        // const existingStats = await DailyStats.findOne({
+        //     transformer: transformer._id,
+        //     date
+        // });
 
 
-        // Calculate new daily averages
-        const dailyAverages =
-            TransformerServices.calculateDailyAverages(
-                existingStats,
-                {
-                    temperature,
-                    oil,
-                    load: {
-                        apparentPowerKVA,
-                        loadPercentage: loadResult.loadPercentage
-                    }
-                }
-            );
+        // // Calculate new daily averages
+        // const dailyAverages =
+        //     TransformerServices.calculateDailyAverages(
+        //         existingStats,
+        //         {
+        //             temperature,
+        //             oil,
+        //             load: {
+        //                 apparentPowerKVA,
+        //                 loadPercentage: loadResult.loadPercentage
+        //             }
+        //         }
+        //     );
 
 
-        // Save daily averages
-        await DailyStats.findOneAndUpdate(
-            {
-                transformer: transformer._id,
-                date
-            },
-            {
-                $set: {
-                    ...dailyAverages,
-                    transformer: transformer._id,
-                    date
-                }
-            },
-            {
-                upsert: true,
-                new: true,
-                runValidators: true
-            }
-        );
+        // // Save daily averages
+        // await DailyStats.findOneAndUpdate(
+        //     {
+        //         transformer: transformer._id,
+        //         date
+        //     },
+        //     {
+        //         $set: {
+        //             ...dailyAverages,
+        //             transformer: transformer._id,
+        //             date
+        //         }
+        //     },
+        //     {
+        //         upsert: true,
+        //         new: true,
+        //         runValidators: true
+        //     }
+        // );
 
 
         return res.status(200).json({
@@ -188,7 +207,7 @@ exports.getTransformerCondition = async (req, res, next) => {
                 load: loadResult
             },
 
-            dailyAverages
+            // dailyAverages
         });
 
     } catch (error) {

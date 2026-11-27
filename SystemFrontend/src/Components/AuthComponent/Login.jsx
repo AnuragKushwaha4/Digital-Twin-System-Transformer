@@ -12,6 +12,7 @@ function Login() {
         password: ""
     });
 
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -94,15 +95,27 @@ function Login() {
                             Password
                         </label>
 
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            placeholder="Enter your password"
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
+                        <div className="relative">
+
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                placeholder="Enter your password"
+                                required
+                                className="w-full px-4 py-3 pr-16 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(prev => !prev)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-blue-600 hover:text-blue-800"
+                            >
+                                {showPassword ? "Hide" : "Show"}
+                            </button>
+
+                        </div>
                     </div>
 
                     <button

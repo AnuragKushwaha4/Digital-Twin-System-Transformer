@@ -24,10 +24,6 @@ const userSchema =new mongoose.Schema({
     },
     message: "Please enter a valid Indian phone number"
   }
-    },
-    role:{
-        type:String,
-        required:true
     }
 },{timestamps:true})
 

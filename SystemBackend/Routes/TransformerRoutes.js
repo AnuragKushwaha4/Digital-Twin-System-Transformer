@@ -33,4 +33,10 @@ router.delete(
     TransformerControllers.deleteTransformer
 );
 
+router.get(
+    "/",
+    Authorized,
+    TransformerControllers.getAllTransformers
+);
+
 module.exports = router;
