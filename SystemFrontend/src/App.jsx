@@ -10,6 +10,7 @@ import Header from "./Components/CommanComponent/Header";
 
 import Register from "./Components/AuthComponent/Register";
 import Login from "./Components/AuthComponent/Login";
+import Health from "./Components/CommanComponent/Health";
 
 import TransformerDashboard from "./Components/TransformerComponent/TransformerDashboard";
 
