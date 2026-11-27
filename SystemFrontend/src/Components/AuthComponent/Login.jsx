@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../Http/http";
+import { loginUser } from "../../Http/http";
 
 function Login() {
 
@@ -32,10 +32,7 @@ function Login() {
         setLoading(true);
 
         try {
-            const response = await api.post(
-                "/api/auth/login",
-                formData
-            );
+            const response = await loginUser(formData);
 
             if (response.data.success) {
                 navigate("/transformers", { replace: true });
@@ -96,7 +93,6 @@ function Login() {
                         </label>
 
                         <div className="relative">
-
                             <input
                                 type={showPassword ? "text" : "password"}
                                 name="password"
@@ -114,7 +110,6 @@ function Login() {
                             >
                                 {showPassword ? "Hide" : "Show"}
                             </button>
-
                         </div>
                     </div>
 

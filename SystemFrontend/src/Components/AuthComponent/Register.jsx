@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../Http/http";
+import { registerUser } from "../../Http/http";
 
 function Register() {
 
@@ -33,10 +33,7 @@ function Register() {
         setLoading(true);
 
         try {
-            const response = await api.post(
-                "/api/auth/register",
-                formData
-            );
+            const response = await registerUser(formData);
 
             if (response.data.success) {
                 navigate("/transformers", { replace: true });

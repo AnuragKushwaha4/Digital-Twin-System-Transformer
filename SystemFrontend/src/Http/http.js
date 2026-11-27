@@ -30,10 +30,7 @@ export const addTransformer = (data) =>
 export const getTransformerCondition = (id, data) =>
     api.post(`/api/transformer/${id}/condition`, data);
 
-export const updateTransformer = (id, data) =>
-    api.put(`/api/transformer/${id}`, data);
-
-export const deleteTransformer = (id) =>
-    api.delete(`/api/transformer/${id}`);
+export const getTransformerHistory = (id) =>
+    api.get(`/api/transformer/${id}/history`);
 
 export default api;
