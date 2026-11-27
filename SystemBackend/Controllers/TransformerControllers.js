@@ -263,54 +263,10 @@ exports.getTransformerCondition = async (req, res, next) => {
 };
 
 
-// 3. Update Transformer
-exports.updateTransformer = async (req, res, next) => {
-    try {
-
-        const transformer = await getTransformer(
-            req.params.transformerID
-        );
-
-        const updatedTransformer =
-            await TransformerServices.updateTransformer(
-                transformer,
-                req.body
-            );
-
-        return res.status(200).json({
-            success: true,
-            message: "Transformer updated successfully",
-            data: updatedTransformer
-        });
-
-    } catch (error) {
-        next(error);
-    }
-};
 
 
-// 4. Delete Transformer
-exports.deleteTransformer = async (req, res, next) => {
-    try {
 
-        const transformer = await getTransformer(
-            req.params.transformerID
-        );
 
-        await TransformerServices.deleteTransformer(
-            transformer,
-            DailyStats
-        );
-
-        return res.status(200).json({
-            success: true,
-            message: "Transformer and its monitoring history deleted successfully"
-        });
-
-    } catch (error) {
-        next(error);
-    }
-};
 
 
 

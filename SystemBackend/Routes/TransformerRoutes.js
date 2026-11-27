@@ -19,19 +19,7 @@ router.post(
     TransformerControllers.getTransformerCondition
 );
 
-// Update transformer specifications
-router.put(
-    "/:transformerID",
-    Authorized,
-    TransformerControllers.updateTransformer
-);
 
-// Delete transformer and its history
-router.delete(
-    "/:transformerID",
-    Authorized,
-    TransformerControllers.deleteTransformer
-);
 
 router.get(
     "/",

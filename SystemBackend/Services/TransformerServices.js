@@ -262,43 +262,8 @@ exports.addTransformer = async (transformerData) => {
 };
 
 
-// Update transformer
-exports.updateTransformer = async (transformer, updateData) => {
-
-    if (updateData.transformerID !== undefined &&
-        updateData.transformerID !== transformer.transformerID) {
-        throw createError("Transformer ID cannot be changed", 400);
-    }
-
-    const updatedTransformer = await Transformer.findByIdAndUpdate(
-        transformer._id,
-        {
-            $set: {
-                address: updateData.address,
-                specification: updateData.specification
-            }
-        },
-        {
-            new: true,
-            runValidators: true
-        }
-    );
-
-    return updatedTransformer;
-};
 
 
-// Delete transformer
-exports.deleteTransformer = async (transformer, DailyStats) => {
-
-    await DailyStats.deleteMany({
-        transformer: transformer._id
-    });
-
-    await Transformer.findByIdAndDelete(transformer._id);
-
-    return true;
-};
 
 
 
